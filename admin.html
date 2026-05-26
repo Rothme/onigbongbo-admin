@@ -1,0 +1,819 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Onigbongbo LCDA — Admin Portal</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{
+  --g:#0B4A2A;--gm:#0F5E35;--gl:#1A7A49;
+  --glight:#E8F5EE;--gpale:#F3FAF6;
+  --gold:#C8931A;--goldl:#FDF3DC;
+  --red:#B91C1C;--redl:#FEE2E2;
+  --blue:#1A3A6A;--bluel:#E8EFFA;
+  --amber:#92400E;--amberl:#FEF3C7;
+  --w:#fff;--off:#F4F6F5;
+  --border:#D6E4DB;--text:#0D1F13;--muted:#4A6655;
+  --sidebar:220px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%;overflow:hidden}
+body{font-family:'Outfit',sans-serif;color:var(--text);background:var(--off)}
+input,button,select{font-family:'Outfit',sans-serif}
+button{cursor:pointer;border:none}
+
+/* LOGIN */
+#login-screen{position:fixed;inset:0;background:var(--g);display:flex;align-items:center;justify-content:center;z-index:1000;padding:20px}
+.lbox{background:#fff;border-radius:20px;padding:36px;width:100%;max-width:400px;box-shadow:0 20px 60px rgba(0,0,0,.3)}
+.llogo{width:68px;height:68px;border-radius:50%;border:3px solid var(--gold);overflow:hidden;margin:0 auto 14px;background:#fff}
+.llogo img{width:100%;height:100%;object-fit:cover}
+.ltitle{font-size:20px;font-weight:800;text-align:center;color:var(--g);margin-bottom:4px}
+.lsub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:24px}
+.lg{margin-bottom:12px}
+.ll{display:block;font-size:11px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;margin-bottom:5px}
+.li{width:100%;padding:12px 14px;border-radius:9px;border:1.5px solid var(--border);font-size:14px;outline:none;transition:border-color .15s}
+.li:focus{border-color:var(--gm)}
+.li.err{border-color:var(--red)}
+.lbtn{width:100%;padding:13px;border-radius:9px;background:var(--gm);color:#fff;font-size:15px;font-weight:700;border:none;cursor:pointer;margin-top:6px}
+.lbtn:hover{background:var(--gl)}
+.lerr{background:#FEE2E2;color:var(--red);border:1px solid #fca5a5;border-radius:7px;padding:9px 12px;font-size:12px;margin-bottom:12px;display:none}
+.lhint{font-size:11px;color:var(--muted);text-align:center;margin-top:12px}
+
+/* APP */
+#app{display:none;height:100vh;overflow:hidden}
+.layout{display:flex;height:100%}
+
+/* SIDEBAR */
+.sidebar{width:var(--sidebar);background:var(--g);display:flex;flex-direction:column;flex-shrink:0;overflow-y:auto}
+@media(max-width:820px){.sidebar{display:none}}
+.sb-head{padding:16px;border-bottom:1px solid rgba(255,255,255,.1);display:flex;align-items:center;gap:10px}
+.sb-head img{width:36px;height:36px;border-radius:50%;border:2px solid var(--gold);flex-shrink:0}
+.sb-ht{font-size:12px;font-weight:700;color:#fff;line-height:1.3}
+.sb-hs{font-size:10px;color:rgba(255,255,255,.45)}
+.sb-user{padding:10px 16px;border-bottom:1px solid rgba(255,255,255,.1);font-size:11px;color:rgba(255,255,255,.55)}
+.sb-user strong{color:#fff;font-size:12px;display:block;margin-bottom:1px}
+.sb-sec{padding:12px 16px 3px;font-size:9px;font-weight:700;color:rgba(255,255,255,.3);text-transform:uppercase;letter-spacing:.1em}
+.nav{display:flex;align-items:center;gap:9px;padding:9px 16px;font-size:13px;color:rgba(255,255,255,.7);cursor:pointer;border-left:3px solid transparent;transition:background .12s,color .12s}
+.nav:hover{background:rgba(255,255,255,.06);color:#fff}
+.nav.on{background:rgba(200,147,26,.15);color:var(--gold);border-left-color:var(--gold);font-weight:600}
+.nav-ic{font-size:14px;width:17px;text-align:center}
+.sb-bot{margin-top:auto;padding:14px}
+.btn-lo{width:100%;padding:8px;border-radius:7px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.15);color:rgba(255,255,255,.65);font-size:12px;font-weight:600;cursor:pointer}
+.btn-lo:hover{background:rgba(255,255,255,.14);color:#fff}
+
+/* MAIN */
+.main{flex:1;display:flex;flex-direction:column;overflow:hidden;min-width:0}
+.mob-nav{display:none;background:var(--g);padding:8px 12px;gap:5px;overflow-x:auto;flex-shrink:0}
+@media(max-width:820px){.mob-nav{display:flex}}
+.mb{flex-shrink:0;padding:6px 12px;border-radius:20px;font-size:11px;font-weight:600;color:rgba(255,255,255,.7);cursor:pointer;border:1px solid rgba(255,255,255,.15);white-space:nowrap}
+.mb.on{background:var(--gold);color:#fff;border-color:var(--gold)}
+
+/* TOPBAR */
+.topbar{background:#fff;padding:12px 22px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-shrink:0;box-shadow:0 1px 4px rgba(0,0,0,.05)}
+.topbar h1{font-size:17px;font-weight:700}
+.topbar p{font-size:11px;color:var(--muted);margin-top:1px}
+.tb-r{display:flex;align-items:center;gap:8px}
+.live{display:inline-flex;align-items:center;gap:4px;font-size:11px;font-weight:600;color:var(--gm)}
+.live::before{content:'';width:6px;height:6px;border-radius:50%;background:var(--gm);animation:blink 1.4s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.3}}
+
+/* CONTENT */
+.content{flex:1;overflow-y:auto;padding:20px}
+@media(max-width:600px){.content{padding:12px}}
+.tab{display:none}.tab.on{display:block}
+
+/* STATS */
+.sg{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin-bottom:18px}
+.sc{background:#fff;border-radius:12px;border:1px solid var(--border);padding:16px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.sc.acc{background:var(--gm);border-color:var(--gm)}
+.sv{font-size:24px;font-weight:800;color:var(--text);font-family:'DM Mono',monospace}
+.sc.acc .sv{color:#fff}
+.sl{font-size:12px;color:var(--muted);margin-top:3px}
+.sc.acc .sl{color:rgba(255,255,255,.7)}
+.st{font-size:11px;margin-top:6px;font-weight:600}
+.up{color:var(--gm)}.dn{color:var(--red)}
+.pb{height:4px;background:var(--border);border-radius:3px;margin-top:7px;overflow:hidden}
+.pf{height:100%;border-radius:3px;background:var(--gm);transition:width 1s ease}
+
+/* CARD */
+.card{background:#fff;border-radius:12px;border:1px solid var(--border);overflow:hidden;margin-bottom:14px;box-shadow:0 1px 6px rgba(0,0,0,.05)}
+.ch{padding:14px 16px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.ch h3{font-size:14px;font-weight:700}
+.cb{padding:16px}
+
+/* TABLE */
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{padding:9px 12px;text-align:left;font-size:10px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;border-bottom:2px solid var(--border);background:var(--off);white-space:nowrap;position:sticky;top:0;z-index:1}
+.tbl td{padding:10px 12px;border-bottom:1px solid var(--border);white-space:nowrap}
+.tbl tr:last-child td{border:none}
+.tbl tr:hover td{background:var(--gpale)}
+.tbl-wrap{overflow-x:auto;max-height:480px;overflow-y:auto}
+
+/* BADGES */
+.b{display:inline-flex;align-items:center;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:700}
+.bg{background:var(--glight);color:var(--g)}
+.br{background:var(--redl);color:var(--red)}
+.bo{background:var(--amberl);color:var(--amber)}
+.bb{background:var(--bluel);color:var(--blue)}
+.rt{display:inline-flex;padding:2px 8px;border-radius:20px;font-size:10px;font-weight:600;background:var(--glight);color:var(--g)}
+
+/* PAGER */
+.pager{display:flex;align-items:center;justify-content:space-between;padding:10px 16px;border-top:1px solid var(--border);font-size:12px;color:var(--muted);flex-wrap:wrap;gap:8px}
+.pager-btns{display:flex;gap:5px;flex-wrap:wrap}
+.pbtn{padding:4px 10px;border-radius:6px;border:1.5px solid var(--border);font-size:11px;font-weight:600;background:#fff;cursor:pointer;transition:background .12s}
+.pbtn:hover{background:var(--gpale)}
+.pbtn.on{background:var(--gm);color:#fff;border-color:var(--gm)}
+.pbtn:disabled{opacity:.4;cursor:default}
+
+/* FILTER BAR */
+.fbar{padding:10px 14px;border-bottom:1px solid var(--border);display:flex;gap:7px;flex-wrap:wrap;align-items:center;background:var(--off)}
+.fi{padding:7px 11px;border-radius:7px;border:1.5px solid var(--border);font-size:12px;outline:none;transition:border-color .15s;background:#fff}
+.fi:focus{border-color:var(--gm)}
+.fi-s{flex:1;min-width:160px}
+.btn-s{padding:7px 14px;border-radius:7px;font-size:12px;font-weight:600;background:var(--gm);color:#fff;border:none;cursor:pointer}
+.btn-s:hover{background:var(--gl)}
+.btn-out{background:transparent;border:1.5px solid var(--border);color:var(--text)}
+.btn-out:hover{background:var(--gpale)}
+
+/* IMPORT ZONE */
+.import-zone{
+  border:2px dashed var(--border);border-radius:12px;
+  padding:32px 20px;text-align:center;
+  background:var(--gpale);cursor:pointer;
+  transition:border-color .2s,background .2s;
+  margin-bottom:16px;
+}
+.import-zone:hover,.import-zone.drag{border-color:var(--gm);background:var(--glight)}
+.import-zone .iz-icon{font-size:36px;margin-bottom:10px}
+.import-zone .iz-title{font-size:15px;font-weight:700;color:var(--g);margin-bottom:4px}
+.import-zone .iz-sub{font-size:12px;color:var(--muted)}
+.import-zone input[type=file]{display:none}
+
+/* CHART */
+.chart{height:130px;display:flex;align-items:flex-end;gap:7px}
+.bg-bar{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px}
+.bar{width:100%;border-radius:3px 3px 0 0;background:var(--glight);transition:height .8s ease;min-height:3px}
+.bar.hi{background:var(--gm)}
+.blbl{font-size:9px;color:var(--muted)}
+
+/* LINE ITEMS */
+.lr{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+.lr:last-child{border:none}
+.lr.tot{background:var(--gpale);padding:10px 14px;margin:0 -16px}
+.ln{font-size:13px;font-weight:500}.ld{font-size:11px;color:var(--muted);margin-top:1px}
+.la{font-family:'DM Mono',monospace;font-size:13px;font-weight:600}
+
+/* MODAL */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:500;align-items:center;justify-content:center;padding:20px}
+.modal-bg.on{display:flex}
+.modal{background:#fff;border-radius:16px;padding:26px;width:100%;max-width:460px;max-height:90vh;overflow-y:auto;box-shadow:0 20px 60px rgba(0,0,0,.25)}
+.modal h2{font-size:15px;font-weight:700;margin-bottom:14px}
+.modal-close{float:right;font-size:20px;cursor:pointer;color:var(--muted);background:none;border:none;line-height:1}
+.dr{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.dr:last-child{border:none}
+.dk{color:var(--muted);width:45%}.dv{font-weight:500;text-align:right}
+
+/* ALERT */
+.al{padding:10px 14px;border-radius:8px;font-size:12px;display:flex;gap:8px;align-items:flex-start;margin-bottom:12px}
+.al-g{background:var(--glight);color:var(--g);border:1px solid #b8dfc8}
+.al-gold{background:var(--goldl);color:#78450A;border:1px solid #f0d898}
+</style>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="login-screen">
+  <div class="lbox">
+    <div class="llogo"><img id="login-logo" src="" alt="Logo"></div>
+    <div class="ltitle">Admin Portal</div>
+    <div class="lsub">Onigbongbo LCDA Revenue Management</div>
+    <div class="lerr" id="lerr">⚠ Incorrect username or password.</div>
+    <div class="lg"><label class="ll">Username</label><input class="li" type="text" id="lu" placeholder="Username" autocomplete="username"></div>
+    <div class="lg"><label class="ll">Password</label><input class="li" type="password" id="lp" placeholder="Password" autocomplete="current-password"></div>
+    <button class="lbtn" onclick="doLogin()">Sign In →</button>
+    <div class="lhint">Demo: <strong>admin</strong> / <strong>lcda2026</strong></div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <div class="sidebar">
+    <div class="sb-head">
+      <img id="sb-logo" src="" alt="Logo">
+      <div><div class="sb-ht">Onigbongbo LCDA</div><div class="sb-hs">Admin Portal</div></div>
+    </div>
+    <div class="sb-user"><strong id="sb-u">Admin</strong><span id="sb-r">Super Admin</span></div>
+    <div class="sb-sec">Main</div>
+    <div class="nav on" onclick="tab('overview',this)"><span class="nav-ic">📊</span>Overview</div>
+    <div class="nav" onclick="tab('transactions',this)"><span class="nav-ic">💳</span>Transactions</div>
+    <div class="nav" onclick="tab('compliance',this)"><span class="nav-ic">✅</span>Compliance</div>
+    <div class="sb-sec">Management</div>
+    <div class="nav" onclick="tab('payers',this)"><span class="nav-ic">👥</span>Payers <span id="sb-count" style="margin-left:auto;background:var(--gold);color:#fff;font-size:9px;font-weight:700;padding:1px 6px;border-radius:20px">0</span></div>
+    <div class="nav" onclick="tab('regions',this)"><span class="nav-ic">🗺️</span>Regions</div>
+    <div class="nav" onclick="tab('users',this)"><span class="nav-ic">👤</span>Admin Users</div>
+    <div class="sb-sec">Finance</div>
+    <div class="nav" onclick="tab('remittance',this)"><span class="nav-ic">📄</span>Remittance</div>
+    <div class="sb-bot"><button class="btn-lo" onclick="logout()">🚪 Sign Out</button></div>
+  </div>
+
+  <!-- MAIN -->
+  <div class="main">
+    <div class="mob-nav">
+      <button class="mb on" onclick="tab('overview',this)">📊 Overview</button>
+      <button class="mb" onclick="tab('transactions',this)">💳 Transactions</button>
+      <button class="mb" onclick="tab('compliance',this)">✅ Compliance</button>
+      <button class="mb" onclick="tab('payers',this)">👥 Payers</button>
+      <button class="mb" onclick="tab('regions',this)">🗺️ Regions</button>
+      <button class="mb" onclick="tab('remittance',this)">📄 Remittance</button>
+    </div>
+
+    <div class="topbar">
+      <div id="tb"><h1>Revenue Overview</h1><p>Onigbongbo LCDA · May 2026</p></div>
+      <div class="tb-r">
+        <span class="live">Live</span>
+        <button class="btn-s" onclick="alert('Exports PDF/Excel report')">Export</button>
+      </div>
+    </div>
+
+    <div class="content">
+
+      <!-- OVERVIEW -->
+      <div class="tab on" id="tab-overview">
+        <div class="sg">
+          <div class="sc acc">
+            <div class="sv" id="d-total">₦0</div>
+            <div class="sl">Collected — May 2026</div>
+            <div class="pb"><div class="pf" id="d-prog" style="width:0%;background:var(--gold)"></div></div>
+            <div style="font-size:10px;color:rgba(255,255,255,.5);margin-top:3px">78% of ₦85M target</div>
+          </div>
+          <div class="sc"><div class="sv" id="ov-total">0</div><div class="sl">Registered Payers</div><div class="st up" id="ov-new">Upload registry to populate</div></div>
+          <div class="sc"><div class="sv" id="d-comp">—</div><div class="sl">Compliance Rate</div><div class="pb"><div class="pf" id="d-cprog" style="width:0%"></div></div></div>
+          <div class="sc"><div class="sv" id="d-over">—</div><div class="sl">Overdue Accounts</div><div class="st dn">Auto-reminders active</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:3fr 2fr;gap:14px">
+          <div class="card" style="grid-column:1/-1">
+            <div class="ch"><h3>Monthly Collections 2026</h3><span style="font-size:11px;color:var(--muted)">₦ Millions</span></div>
+            <div class="cb"><div class="chart" id="m-chart"></div><div style="display:flex;gap:7px;margin-top:5px" id="m-lbls"></div></div>
+          </div>
+          <div class="card">
+            <div class="ch"><h3>By Category</h3></div>
+            <div class="cb" id="cat-bars"></div>
+          </div>
+          <div class="card">
+            <div class="ch"><h3>Recent Transactions</h3><span class="live">Live</span></div>
+            <div id="recent-txns">
+              <div style="padding:20px;text-align:center;font-size:12px;color:var(--muted)">Upload payer registry to see transactions</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- TRANSACTIONS -->
+      <div class="tab" id="tab-transactions">
+        <div class="card">
+          <div class="ch"><h3>All Transactions · May 2026</h3><button class="btn-s" onclick="alert('Export to Excel/PDF')">Export</button></div>
+          <div style="overflow-x:auto">
+            <table class="tbl">
+              <tr><th>Reference</th><th>Payer</th><th>Region</th><th>Amount</th><th>Channel</th><th>Date</th><th>Status</th></tr>
+              <tr><td style="font-family:'DM Mono',monospace">PSK-2026-447821</td><td>Okafor Supermart</td><td><span class="rt">Opebi</span></td><td style="font-family:'DM Mono',monospace">₦45,000</td><td>Card</td><td>20 May 26</td><td><span class="b bg">Paid</span></td></tr>
+              <tr><td style="font-family:'DM Mono',monospace">PSK-2026-447820</td><td>Blessed Pharmacy</td><td><span class="rt">Oregun</span></td><td style="font-family:'DM Mono',monospace">₦28,500</td><td>Transfer</td><td>20 May 26</td><td><span class="b bg">Paid</span></td></tr>
+              <tr><td style="font-family:'DM Mono',monospace">PSK-2026-447819</td><td>Chukwu &amp; Sons</td><td><span class="rt">Maryland</span></td><td style="font-family:'DM Mono',monospace">₦62,000</td><td>Transfer</td><td>20 May 26</td><td><span class="b bg">Paid</span></td></tr>
+              <tr><td style="font-family:'DM Mono',monospace">PSK-2026-447812</td><td>Sunrise Bakery</td><td><span class="rt">Ikeja GRA</span></td><td style="font-family:'DM Mono',monospace">₦8,500</td><td>USSD</td><td>19 May 26</td><td><span class="b bg">Paid</span></td></tr>
+              <tr><td style="font-family:'DM Mono',monospace">PSK-2026-447800</td><td>Mama Titi Bukka</td><td><span class="rt">Oregun</span></td><td style="font-family:'DM Mono',monospace">₦12,000</td><td>—</td><td>Due 30 Jun</td><td><span class="b br">Overdue</span></td></tr>
+              <tr><td style="font-family:'DM Mono',monospace">PSK-2026-447795</td><td>Lagos Dry Cleaners</td><td><span class="rt">Maryland</span></td><td style="font-family:'DM Mono',monospace">₦18,000</td><td>Transfer</td><td>18 May 26</td><td><span class="b bg">Paid</span></td></tr>
+            </table>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLIANCE -->
+      <div class="tab" id="tab-compliance">
+        <div class="sg">
+          <div class="sc acc"><div class="sv" id="c-rate">—</div><div class="sl">Overall Compliance</div></div>
+          <div class="sc"><div class="sv" id="c-comp">—</div><div class="sl">Compliant Payers</div></div>
+          <div class="sc"><div class="sv" id="c-over">—</div><div class="sl">Non-Compliant</div></div>
+          <div class="sc"><div class="sv" id="c-pend">—</div><div class="sl">Pending</div></div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Compliance by Region</h3></div>
+          <div class="tbl-wrap"><table class="tbl" id="comp-table">
+            <tr><th>Region</th><th>Admin</th><th>Total</th><th>Compliant</th><th>Rate</th><th>Outstanding (₦)</th></tr>
+            <tr><td colspan="6" style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Upload payer registry to populate compliance data</td></tr>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- PAYERS -->
+      <div class="tab" id="tab-payers">
+        <div class="card" id="import-card">
+          <div class="ch">
+            <h3>📥 Import Payer Registry</h3>
+            <div style="display:flex;gap:8px">
+              <a id="dl-template" href="#" onclick="downloadTemplate()" class="btn-s btn-out" style="text-decoration:none;padding:7px 14px;font-size:12px;border-radius:7px;display:inline-flex;align-items:center;gap:5px">⬇ Download Template</a>
+            </div>
+          </div>
+          <div class="cb">
+            <div class="al al-gold">
+              <span>ℹ</span>
+              <span>Upload the provided Excel file or any CSV matching the template. Columns required: <strong>Account ID, Business Name, Category, Region, Address, Phone Number, Last Payment Date, Payment Channel, Balance Due (₦), Status</strong></span>
+            </div>
+            <div class="import-zone" id="drop-zone" onclick="document.getElementById('file-input').click()"
+              ondragover="event.preventDefault();this.classList.add('drag')"
+              ondragleave="this.classList.remove('drag')"
+              ondrop="handleDrop(event)">
+              <input type="file" id="file-input" accept=".csv,.xlsx,.xls" onchange="handleFile(this.files[0])">
+              <div class="iz-icon">📂</div>
+              <div class="iz-title">Drop your file here or click to browse</div>
+              <div class="iz-sub">Accepts CSV or Excel (.xlsx) · Max 10MB</div>
+            </div>
+            <div id="import-status" style="display:none"></div>
+          </div>
+        </div>
+
+        <div class="card" id="payer-table-card" style="display:none">
+          <div class="ch">
+            <h3>Payer Registry <span id="payer-count-lbl" style="font-weight:400;color:var(--muted);font-size:12px"></span></h3>
+            <div style="display:flex;gap:7px">
+              <button class="btn-s btn-out" onclick="showImport()">↩ Re-import</button>
+              <button class="btn-s" onclick="alert('Export filtered results to Excel')">Export</button>
+            </div>
+          </div>
+          <div class="fbar">
+            <input class="fi fi-s" id="p-search" type="text" placeholder="Search name, account ID, address…" oninput="filterPayers()">
+            <select class="fi" id="p-region" onchange="filterPayers()">
+              <option value="">All regions</option>
+              <option>Opebi</option><option>Oregun</option><option>Maryland</option>
+              <option>Ikeja GRA</option><option>Shomolu</option><option>Omole</option><option>Anthony</option>
+            </select>
+            <select class="fi" id="p-status" onchange="filterPayers()">
+              <option value="">All statuses</option>
+              <option>Compliant</option><option>Overdue</option><option>Pending</option>
+            </select>
+            <button class="btn-s btn-out" onclick="resetFilters()">Reset</button>
+          </div>
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead><tr>
+                <th>Account ID</th><th>Business Name</th><th>Category</th>
+                <th>Region</th><th>Address</th><th>Phone</th>
+                <th>Last Payment</th><th>Balance Due</th><th>Status</th><th></th>
+              </tr></thead>
+              <tbody id="payer-tbody"></tbody>
+            </table>
+          </div>
+          <div class="pager">
+            <span id="pager-info"></span>
+            <div class="pager-btns" id="pager-btns"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- REGIONS -->
+      <div class="tab" id="tab-regions">
+        <div class="card">
+          <div class="ch"><h3>Region Management</h3><button class="btn-s" onclick="alert('Add region')">+ Add Region</button></div>
+          <div class="tbl-wrap"><table class="tbl" id="reg-table">
+            <tr><th>Region</th><th>Assigned Admin</th><th>Payers</th><th>Compliant</th><th>Rate</th><th>Collections</th><th>Actions</th></tr>
+            <tr><td colspan="7" style="text-align:center;padding:20px;color:var(--muted);font-size:12px">Upload payer registry to populate region data</td></tr>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="tab" id="tab-users">
+        <div class="card">
+          <div class="ch"><h3>Admin Users</h3><button class="btn-s" onclick="alert('Add user')">+ Add User</button></div>
+          <div style="overflow-x:auto"><table class="tbl">
+            <tr><th>Name</th><th>Role</th><th>Region</th><th>Last Active</th><th>Status</th><th></th></tr>
+            <tr><td><strong id="u-name">Admin</strong></td><td><span class="b bo">Super Admin</span></td><td>All regions</td><td>Now</td><td><span class="b bg">Active</span></td><td><button class="btn-s btn-out" style="padding:5px 10px;font-size:11px">Edit</button></td></tr>
+            <tr><td>Ade Balogun</td><td><span class="b bg">Region Admin</span></td><td>Opebi / Oregun</td><td>1 hr ago</td><td><span class="b bg">Active</span></td><td><button class="btn-s btn-out" style="padding:5px 10px;font-size:11px">Edit</button></td></tr>
+            <tr><td>Kemi Adeyemi</td><td><span class="b bg">Region Admin</span></td><td>Maryland</td><td>3 hrs ago</td><td><span class="b bg">Active</span></td><td><button class="btn-s btn-out" style="padding:5px 10px;font-size:11px">Edit</button></td></tr>
+            <tr><td>Tunde Rasheed</td><td><span class="b bg">Region Admin</span></td><td>Ikeja GRA</td><td>2 hrs ago</td><td><span class="b bg">Active</span></td><td><button class="btn-s btn-out" style="padding:5px 10px;font-size:11px">Edit</button></td></tr>
+            <tr><td>Ngozi Okonkwo</td><td><span class="b bg">Region Admin</span></td><td>Shomolu</td><td>Yesterday</td><td><span class="b bg">Active</span></td><td><button class="btn-s btn-out" style="padding:5px 10px;font-size:11px">Edit</button></td></tr>
+            <tr><td>LGA Finance</td><td><span class="b bb">Finance View</span></td><td>Read only</td><td>Yesterday</td><td><span class="b bg">Active</span></td><td><button class="btn-s btn-out" style="padding:5px 10px;font-size:11px">Edit</button></td></tr>
+          </table></div>
+        </div>
+      </div>
+
+      <!-- REMITTANCE -->
+      <div class="tab" id="tab-remittance">
+        <div class="card" style="margin-bottom:14px">
+          <div class="ch"><h3>Remittance Summary — May 2026</h3><button class="btn-s" onclick="alert('Export PDF')">Export PDF</button></div>
+          <div class="cb">
+            <div class="lr"><div><div class="ln">Gross Collections</div></div><div class="la" style="font-size:15px">₦66,200,000</div></div>
+            <div class="lr"><div><div class="ln">Paystack Fees (1.5%)</div><div class="ld">Gateway charge</div></div><div class="la" style="color:var(--muted)">−₦993,000</div></div>
+            <div class="lr"><div><div class="ln">Collection Service Fee (5%)</div><div class="ld">Auto-routed via Paystack Split</div></div><div class="la" style="color:var(--muted)">−₦3,310,000</div></div>
+            <div class="lr tot"><div><div class="ln" style="font-weight:700">Net to LGA Account</div></div><div class="la" style="font-size:16px;color:var(--gm)">₦61,897,000</div></div>
+          </div>
+        </div>
+        <div class="card">
+          <div class="ch"><h3>Remittance History</h3></div>
+          <div style="overflow-x:auto"><table class="tbl">
+            <tr><th>Month</th><th>Gross</th><th>Service Fee</th><th>Net to LGA</th><th>Status</th></tr>
+            <tr><td>May 2026</td><td style="font-family:'DM Mono',monospace">₦66.2M</td><td style="font-family:'DM Mono',monospace">₦3.31M</td><td style="font-family:'DM Mono',monospace;color:var(--gm);font-weight:700">₦61.9M</td><td><span class="b bo">Processing</span></td></tr>
+            <tr><td>Apr 2026</td><td style="font-family:'DM Mono',monospace">₦71.4M</td><td style="font-family:'DM Mono',monospace">₦3.57M</td><td style="font-family:'DM Mono',monospace;color:var(--gm);font-weight:700">₦66.7M</td><td><span class="b bg">Remitted</span></td></tr>
+            <tr><td>Mar 2026</td><td style="font-family:'DM Mono',monospace">₦67.8M</td><td style="font-family:'DM Mono',monospace">₦3.39M</td><td style="font-family:'DM Mono',monospace;color:var(--gm);font-weight:700">₦63.3M</td><td><span class="b bg">Remitted</span></td></tr>
+          </table></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-bg" id="modal">
+  <div class="modal">
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <h2 id="m-title">Payer Details</h2>
+    <div id="m-body"></div>
+  </div>
+</div>
+
+<script>
+// ── LOGO (loaded from same origin in production; base64 here for portability) ──
+const LOGO = "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/4gHYSUNDX1BST0ZJTEUAAQEAAAHIAAAAAAQwAABtbnRyUkdCIFhZWiAH4AABAAEAAAAAAABhY3NwAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAA9tYAAQAAAADTLQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAlkZXNjAAAA8AAAACRyWFlaAAABFAAAABRnWFlaAAABKAAAABRiWFlaAAABPAAAABR3dHB0AAABUAAAABRyVFJDAAABZAAAAChnVFJDAAABZAAAAChiVFJDAAABZAAAAChjcHJ0AAABjAAAADxtbHVjAAAAAAAAAAEAAAAMZW5VUwAAAAgAAAAcAHMAUgBHAEJYWVogAAAAAAAAb6IAADj1AAADkFhZWiAAAAAAAABimQAAt4UAABjaWFlaIAAAAAAAACSgAAAPhAAAts9YWVogAAAAAAAA9tYAAQAAAADTLXBhcmEAAAAAAAQAAAACZmYAAPKnAAANWQAAE9AAAApbAAAAAAAAAABtbHVjAAAAAAAAAAEAAAAMZW5VUwAAACAAAAAcAEcAbwBvAGcAbABlACAASQBuAGMALgAgADIAMAAxADb/2wBDAAUDBAQEAwUEBAQFBQUGBwwIBwcHBw8LCwkMEQ8SEhEPERETFhwXExQaFRERGCEYGh0dHx8fExciJCIeJBweHx7/2wBDAQUFBQcGBw4ICA4eFBEUHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh4eHh7/wAARCADHAP0DASIAAhEBAxEB/8QAHQABAAIDAQEBAQAAAAAAAAAAAAYHBAUIAwECCf/EAFYQAAEDAwIDBAUHBQoLBgcAAAECAwQABREGIQcSMRMiQVEUYXGBoQgVIzJCkcEzUnKCsRYkJUNTYpKistEXNFVjc3SDhLPC8DU2VJTS8SdEZIWTpOH/xAAcAQACAwEBAQEAAAAAAAAAAAAABQIEBgMBBwj/xAA+EQABAwIDBAcGBAUDBQAAAAABAAIDBBEFITEGEkFREzJhcYGRsRQiocHR4TNCUvAVI2JykgcW8SQlgqKy/9oADAMBAAIRAxEAPwDjKlKUISlKUISlKUISlKUISlKUISlKUISlKzIFruU/PoVvlScdS00pQH3ChRc9rBdxsFh0qTxtAavkI527K6E+a3EJ/aayP8GusP8AJqP/ADDf99R3m81TdidG02Mrf8h9VEKVLP8ABzrHwtGf94a/9VaqXpjUUTPpFkuCAPHsFEfeBXocDxU2V9LJkyRp7iFqKV9UlSThSSD5EV8r1W0pSlCEpSlCEpSlCEpSlCEpSlCEpSlCEpSlCEpSlCEpSlCEpSlCEpX7ZbcedS00hS1qOEpSMkmrU0LwnkS1tv3zm5lYKITXeUvI2yR+wVzklbGN5xsqdbXwUbd6U66Die4KuLNZrpeHuytsJ2QodSkbD2npVlac4PqccaN5nlalnCWIY5io+0jf3CumdEcI1swWV3VTdrgoTkRWgOfH877KPj7qz7rxC4caHZdjaejt3Gaj8p6L/wAz5/DNZaTaR9VN7PhkRmf2dUd7tEva3E673soY+ZzcfDh6qAaR4IvoKXLfpqHACh+Vmg8w9yuZY9+KsSHwgbbBdud7IH2wyzyf11H8Kr298XNe3wYtYatMb/Mt97+mv8AKiNxavNzWV3i9vSlL+y86twfco167CcamzratkI/S0b7vFOKLYf2r3+ifKf1PNh8leLmmeFVs+juepovaf5+6IQr7hivwWuCX+WIR/wB+X+Brnp13S8c8si+RW1j7CpKE/tOaxXb9odAyu7IV7HST8Aa8GzNO7r1szjzAsE5GxsEQs9kLewuBK6RTbuDkn8nqG2tf/deT+2a9Rwv01cme1s+oXXP9oiQn4Yrmli96Kkn6G8tI/wBI5yf2hWxhsW52WPmm9xnpCBkGO+lZ/pNqNB2baz8HEJG/3t3guUmxMEws2KN/9jh9VcGpOC1weSFej2u7tAYSh5sJUfYlQIH31TOs+CkOK8W1wp9jf+zlPO0v2ZPe/VNS+z6z4hWL/Eb7Jmto+w+56Qn+vv8AdU8sHHOFJ/eOs7GG23PrvRm+dH6zS9/uJ9leim2hohvx7lSwfpNnW7j8rpBVbKPoD/Kc+E9ubSuQNT8P9QWMqc7ATYw3D0fJ29aeoqJV/Q2TorSOr7b86aRucZseIR32+byUjqg/9YqieKvCBHpKzcYSrbOWSpEtoBSH/b0Cjn2Kq1h20lNWP6J12SDVrsiPDj4Ki6urKAgV7LtP525jxHBc0Urc6o03ddOyyzPYPZlRDb6N23PYfwO9aatEDdOYpWSsD2G4PEJSlKF0SlKUISlKUISlKUISlKUISlKUISlKUISs2y2ydeLi1b7ewp6Q4dkjoB4knwA8687ZCk3GezBht9o+8oJQnOMn2npXTvBPhgttYtsE9pKdSlcyZy9xCcdPPl8h4nrjqKtZWRUkTpZTYBLMRxD2UNjjG9I7qj5nsWLwc4WdjMbYt7XpdyUnMqWpPcYSRuN+g9X1leG24vaW9ovhPbW5M5wTby42eQHl7Z39EfYR6/21i681bY+GFib09p9puReXG+bs19/kz/Gu+vyH4VRMxbsx6TqHU80rdcBccceWOZWP2D+b0ArJ09FPtAPa61xjpb+60ZOk+gV/AdmpZZzI+z5tXOPVYPQWW+1hrbVeuXnG5TvoVq+xFZ/J/rHqs+3b1CoTfL/pfTKAiU6qTNAyGkpC1j2jOE+/B8iahuruIlwuqzb9NtPMMJGO2Qk9qoDbugfVHx9nSoK1E7ZtKAiSuW6TyDlAQcdRkncgVroGdHEIIGiKIflbkT3nUlal9bRYcbUzRLJxe4Zf+I+Z+KmV54n36cnktkdq3ttgHKfpF+vJO2N/Laog/Pn3Pm+cblKeQgFQC1lYB9QztWTNk2/0pxTIUkcnKQj6q0kDIznPXfw6Y8sfqPb5uWnWmW7Y0tvs1OyXglLmR3j3uuR4AV1ZCyPqhJ6rEqusN5nl3p5afBYbcJooCh2zpU+G0hCeUlJAPNg+eRivSRbuSK2602tzuudqcfUKVEAkeG3nW4g2tp550t3yS/LUvHZW6G44VjxP2dupFbiHokJT2Dln1q4pY3CLXyBXuyTXQAnQKmS1vWIHiFFJNsjNMKJfAd+jTyZ3So45tvEYI++sRcVtxWYofCUJUpRWkZ7viPvHsqTSNH3CMpTkm26phtJOVOOWhWBjoSeYdKwHITqpHPFvkCUpKk8qX1FpR3G30gAHTffpQQRqECzhdpB8QsWJfb7YpKmId2dAb2wlfO37gdqmtm4oIe5GNR2xCynb0hkEqGBt3Sdt+pyfZUHksKZvLK7zCeioUvL+Ek8xznIz4bjp4V6JjImjtVyUuttk8znIpKQVK2TzHoOm5G2R18OfRtvvDI8xqmFPilXTjca+7eRzHkVeOnpz7Dwvej74co2SthfeA32IO36qgD4+NXNobi1bNQtfuf17GjRXVnk7daPoXf0h/FL9fT2Vw/GkzLTN9LtMp9k85CFJPeIBz4bKH93sq0NKaxt+pA1CuCEw7qBypcCsIdHlk+PqPtBydqWJ4bS4qzdrW5jqyDJ7T38QrTGU1d7sQDHn8p6juwX6p78u1dB8UeFzUaA/KjxfnKzuDmcYWnK2k+BJ6kdcKGCPHzrk3iLoaTpx9UuJzyLas5CsElrPQK+/Gfcd66Y4T8TZ+lJbentSuOSLN9RD576ons82/V4eHlUq4raCguwXb1aWGn7bKb55TKCFICFDIWkD7H/XSs9BWVmC1LaLEDvMd1JODu88CsRW4fNhEjp6UHdB99nLtC4JpUv4maRd01di4wgm2yFEsKznkPXkJ8x/10qIVsAQ4XCa01RHUxCWM3BSlKV6u6UpShCUpShCUpShCUpShCUpUq4YaeOoNStpdQDDi4ekZ6EA7J95+Ga8JAFyuNROynidK/QC6svgXoaSltmcuN2tyuISiK2Ru2g7+PTOxz5YG29dN6ou1s4T6EbjRuzkXmX+QGMdq59pav5iM9PYPGvDhFZ4lmssvWF1SGWUtL7NSv4tlP1le04+Hrql9T3uTrnV8i+Tv8X+qyj+SaHRH4n1k1i2xDaDEXiY/wDTQZu/qdwb9VX2awyesmFS9t5Zer/S3/ha0uqIk6j1BODiypTrj8g77/bUMEnwAAB2AABJFUzrjVknVFyS2V+jW1tw9k3jpk7rVjqd/d6zknZcTNTvakuqbTbuZcNhZwB1cWNifYAP2nyxF0sx20tpewlspIdCsBxKh4p8xn8a2ALpnCV4twA4NHABa7FK2OGP2CjP8sdY/rdxJ7L6DxXxDL8RL7a3HEMnlV2jZGFjOxHTI3/68Njb4E1+M7OclOQLOXEoW85jmc8MIQMFSsZ2G3mR1r7pm1elNsyJ7b0lkrKIcJCyFynPFKfJPmR4kAbnbbXfVJtj7nowYk3lJATJQcx7eAdm4yRsCMflNwPsj7Z7AE9yQu3WDPM8B8z2L49bmLShHpiEWhpe6O0Ql+4PJyR3W84aB65VynGCCrx350JrzkYftHDeYpTg7T0qegS1r3zuFgNgYI+xn11peCMKJfOJ7D97QZrMdqRcHm1qyX1NNqc5ST5kdaai4va+ut9lXNrUU+AHld1iK8pDaEjoAPVS+eoqem6KmAyFyXX46AW7ivRG1zd6U+AX7v2nOL64SGrpZtVKiLxyMdi6WhjoAgbD7qhno8y33hpmWy7HktupJQ4khQOQRkVKG+LPEpv6mtbyP94NTPWzp11w/wBN6+nthF6YnfM8taRkSgltTiXD/OABB/Eioe1VUT2+0AWOVwTkdRqpCGItPR+VlT3pklEhbzUh1tSlFRKFkHOa2x1ffnhyXKZ87tk/VuKBJI/RUvKkfqkVoaU0DnDQquY2u1Cmluv1nfa7BCnrA6sjnT3pcBw9CVtr5lp6AkguE+Q6UnWuMhKX0Lbtr7qT2D7DhchTMEHCF9Wz0ylXTO4TULrY2i8TLah1htQdhv4EiI5u08B+cPMeChgjwIoJDtVIFzBYZjkfkdVtIfprclNjlkQXGAoJQpOFLXnPIFZ2yceIyR1Hhr736M7JW5GYTG7NPfABQFHIGAnwUNwfDuk1J1RoFws4ktuPSLOlIbWte8i0rPTm/PZJ2H3DCsc2jcgEXBFvn8inW0ZYW2vuSBtyJBxjcdFe7rULm9ip5OG83T0U54e6wTe2m7Fe3sT07RZR/jMDZKvDm9f2vb1vzgZr12x3P9yGoXP4Ofc5Iy1//LOH7H+jX8CfXXHU2MqMGVpR2b6cl1KFZ5DnKd/A49fhVtaNvadVWDD6k/OsIcjoOAXUY2IH93THgOtWqoqeup3UVT+G/Q8Wu4OHjqnUbziMe678Vgy/raNWntA05hXdxy4ew2BIjpjBdquOSnp9A6AcAHw8CD/cQeN9RWmVZLw/bZacONHrj6wO4Nd68Jr63xD4fSNP3d3tLjEbSytf2lp/invaMYPs9dc5cf8ARz4jOyiwU3G1KUiQEjZbQO5HqH1h6iaz2AVdRBLJhlZ+LEbX/UODvELCvYMLrRu5Qzaf0u+/70VD0pStYnyUpShCUpShCUpShCUpShCV0V8nzSri7VbovLySbvIS4pRG4b8D7AkFX6xqgLNCXcrvDt6CAqS+hoEnYcxAz8a7p+T7ZmRdXpzbYDMFhDDGOieYnf3JSR76R7Q1/sNBJKNbZd+g+KQ4u01U0FCPzm57hn++5PlI3xu0act+i7YezD7aVPIR9hhvuoHvWP6lc88SbujTuk/QI7g9OmKCcgjujHeOOu2AAfWKn2vbqdTcU7rOx2kdh9TLP+ja7o+87++qE4rXP501k4wF4biAMZOfrD6xx7dtvzRU8Jw/+H4dT0R6xHSP7XHQHuX0Sjd7Dh8tW3Jzz0bewW94jwyUdhMuNpadQsc0hK0AZ6jpj1k56VubfBXergtDwdEO3oW7JUSVEnO6EnzUQEprAdc9Gt6nY6nEKUQkqawEcxAOCCSQQAelXvw1iWjQPCe5amucZl65sNoeQDkkPLTlps93A2Wnx2JJ8N3TRvEBZzJjS86D4ngPFVdqq5Gww3bf6MWb/JQEvkjl+bo5A5WEAbpWoE8/kDjqVVDXLVcGzhUZWfIEH8a8Z0qROmvzZThdffcLjiz1UonJNSRdxjXDUcNbLhU032itwRju58fZUnuvppwXJrSM3Zk6qZfJOhxZvE2UzPwIfzNL9IJVy4QUgHfw2NXk3wU4J3O1ouEOQkxVEoQ81ccIUsDJTzZx03Nc/wDycb/YNPasur2oxMVCmWl2HiKnmWStaDjGR4JPjVvWbiJwDsGmHNNxIk2RFQVvoTPg9uQ6oEdTncZ+J3rC43DWurS+AyDJo93Q63vmMxdOKR0Qis+3HVenDrgfwzv2g7de7o5LblOMKflYmciGwFHqDkgcoz99bjX/AA90tp3gVJbsMtUli3yhNhvqeSsFaz2Su8nOQApRqobvxX0nE4aDSlk0o27cpkFMS53JxKWg4AQru8veXkpScq5dx41DInFLVkXQqtFMvxk2ZRBLXZd44IUO916pSfdXVuF4lNN0jpTuh9wD+nwJ7hfgomogYzdDRe2o5qKSrVPjNdq9GWhHmay9P2lMzmkylhuK2Mkk45vVXsxqealAQ+0y8kb94ft862rl0gz7O+xEbKHi0cNJR126ePw/Gtkla9I9isUreOoKHhyqUSfjWTo7RcKbr21Qp7pNreltIfBOCEFwJIJ8sZOfdsajemIcpF5aLrL7SE7qJSU4+/x8qsWyZRdWlA4KQo59iVKrjUEiJxbrYqbAC4XWZorVVo1c47Y2tP2Kw31lC/mb0NlSGLjndUORzKJc7TA5cndW3jvGNS6aEX+DXWlMGSFO2xKjvGdB+kiOFX2gTtv15T9uq58c10Zom4NcXdBXG0SAG9URGkPvyC9gPrbTysyOUnAUQOzcI65QrqTiLWdGbflPwP0PqoOfu+/59o+ypKyMSZhdaUY7XZJ6r6oG+TyjqO947ZO1frS9yd0vqqNMIdDOeVzmbwVNq2VgHrj44rPubqkXeDeI6igzTh7yS+CArbI2JOd/zjttWovq473Oe1dXIQrdTzgKj1SU4TsMEDfxzXYgOFiu7JHU8oew5g3B+IXRmhr+NIa/hXxDivQXSEyMbhTK1YV9x73uq2OPthYdcjXhLSVNy0ejyAOizg4J9qcj3CubNBzVXbh/G5hzvW9ZZOT9kYAx7ElNdQaQkfu04BhtwdrNiMqZ/ndoz9X3lAT99ZTaf+Q+lxYatd0T+0flKltVhzKqB/RjJ7RI3sPEedwuCNU2tVm1BNtijnsHSlJ809R8K1lWbx8toYu8K5pIPpDam1+1JyD7wr4VWVatjt5oKT4XVGrpI5jqRn36H4pSlKkr6UpShCUpShCUpShCl/B+IZWvIRxkMJW6fuwPiRXcfDx02LhBdL6T9J2ciSP1E4T8UVxnwCbzqec5+bD5fvcQfwrsDUznoPycHPNyI2j/API8E/jWM2sb076am4PkYPiktMd/G3uP5I8vE/dUDanPR7RPuD/Rtslf6oOaoWIJUqRIfQyp5ZSpa1D7OfH29fjV3aidSxw5ui1dFMOI95yn+6qYsSnW8kLZbaccSkrdGQFDfzA6Z3rZzO36uY8jbyC3mMDoqOjgH6C7/I/ZbvSttRc9X2azykcyWnFLkKcVyhxtOVrGQMjZKh4759lbLUs2Re7EI0VCu2udweuSgoZJZSVNtjm8kntsgDfIO+2PLRcRx++3pKnQo2+wSlsEZPKOywkDx27T768Ii2rdc2kynkJ7OAylIUtKcdo2hzx9a1VJmpKQzfhtHaT5WA+K1R0tLMNK0qR22+U82QfZWNAtdzjzErVCd2Qrw/mkZ93w9VS43i1q6zGferP7K/SLpBP5OW2fakn8KioAKJ2uNdbW8ZIgKUQn7ShsMVgQkmdd2wtxLZddyVKHMlO+dx5VLNXy0IsxQ0tKlOq5SR0xk9NvHY1CEK5VpURkA5x50LwqxrlZm5FjQkRkOu4PZvNtEleATskHJzlXv61GLPp959l516Mvlb5lntO53UYKhgkHmIO3h+0T/g5KTdXX1hSkSoDHarUk4PKpfIeX+mkY8c1aWiLDbL5rO2Qrk226zJSoupjSS6UoLayEkp+qvKPq1Qq65tIx73gkNFym1Lgzp6Xp2vAOeRvnui5sbLnG02RAvq48ttXZoUAhKkk82d079M9Nt/Has/V9s9DjJkw4zMQRjhfe5XCScDbAPTGfXmuu9S6a0hA4X6mTatMtF5LKHi6uRzyEguDKe1IyggDPZ9T08K4s1TePnKUvl3SD3V5OSPI/cPu2qtg+MMxSN8kbS0NNs7cgfmlcsLmEXWdZZV2ntEx5bYWk94KByNsA5z5bVKNIIuiJs309TXKm3TVJKcg5EV0nofUPhUE0o8pq9sJGOVw8hB6HNWlpxsqXclAZ/gW5r/8A03qZVJ/lO7lKPrBUvU54HKeRrtK2XezKIExZPhtHX199Qap9wWbbVO1M8vrH07McR+koJbH/ABK9mNoyoAXK2HFFpuVcrq/FZeRFuDTN7jBSkuYDg5XBzDH2iRjwKMHpmoaiaH7cIILiiolSi22AASM49QBJ8/aOlSlPau6csb7BPM/b59vd5v8ANqU7t+q4n7qhcJM4sJdiyAUoOC2leCN87jy612d1ioxX6Jt+Fx5FTngY/wBpMulrX9R1gOH1YPL/AMwrqL5Kdw+hvtnc/lG5KPflKv2JrlDgqrOtHu0OFKjLyMbE8yc+z/8AtdJfJsd7PidcYv8AKQXvg4ikO0UAnwatjPANcO8H7LQyDew+meeDnt9D8yqw+UZaBGss1gJz83XApCvEJClIH3giuf66t+VHG5V6qZ/OUh34IX+NcpVawaYz0Uch4gHzCwOAN6OOWEaNe4eiUpSmafJSlKEJSlKEJSlKEKyuAQzfbiP/AKUf2hXXWvh2nycPo/8AwkX4PIrjbgdIDOtS0pWA/FcQB5nYj9hrs9CPnj5O1wZP5VuC8f1m1KWn9iax20ruirKKY6NlZfzSajG7jUzT+aO48MlzVrE54Zz/ANAf2hVNWZT6FrMd9DSiMHmUncdehHqq8ZTXp2iLrECeYdg7j9Io5h8aoi3KKVufXxy5IQnKiPL41sZBu1Uw/qJ81vMb9+GklGhjA/xJuppwueRFvWo33VpcDenpROVZ5iUJGB088er41odWypDd3bUw+42hcGJ9RZGcR0Dw99e+jHEsarjtdq6y3LYdiqKgEqHaNqQB691CtZeUuLhQJC0nuoXHWo+K0KJ/srRXreISGUDdY7vHoVbPCzgdqHW2no2ok6gbixXicNrK+c48cjwzj3GtrdPk6cQUHliqtctP5yZzjZH9Imr1+TStK+DNg5fsthPvyKsip2CdQYdC+JrjqQuA+JHDW/aGtjbmo22WHHj+9wiYl3nIIBGAkdAT0PhVeV1n8tCC5cWbAyjbAkOIA8x2YA+PxA8q5XgsNC5IYnBSEJVhYyQdvDIBI9wNcyk9VEIpSwcFZnyfy3GF9lyZbcaOqMltS157p7Zog/GrRj362WeW3KdDrbbn00OccoU6ndKlt48lhSPOtRbLTZLLCMUshMO4R+xSkqDfdxzjruFg4Xv9pIrFt7VyOnpdossqx3W1zH0BL57PtUOIKgA2pX1Prq2GRvt13nT1ETSSYwTod4XuEtnmnq4egMz2M/SPdz1vz88lYcjikvUvDy6WWe5GL77KlJewUupQhY3cSE75SOu3XxrjWujNP2iKxZ53LOTIdnMqhqfipK2WEK7ygVYHeJCfVt452p3iNpyJp+6JbhzUyEOJ5ikfYOSCOueoO3hS+mp6Smc5lNGGXNyBpfn2eGS8gmId0L3Fx4E/X6qMsOrYeS62cLScg1JrXfNRWVqPelxEPwpSXY6TIbKmXgQUuI6+SiPYanOieFEeXwjm6q1EtcF6fIaZsyicBOebvubfk1qwkHwxnociYfM9ttnALStl1NBUY8yZL9Jc5SH4bmfyiPPlIOU9FD3EVJ8UiLujYN73t0+RJt3ad6bMp3ak2yv8VTTGqbe68lDPDvTLiye6hImKJ93b1LrzE1Zo3RUia9o212BrUTfoKS228ZCkEhw47RxXLvyjpuPLark4UaMt/DbhnddXP2q3T73EUtUecoqKHmCUFKkH7IKd+YdD59Kn6Lho7iFZIOp3UCSLI4qYY7pBLLgbJIcT6uu3XHiMikNZj5ZL/KiJja6xNybkaAC+WdtVajot5nvOs61wFx8y+qJYbHAkhQcQbm8sE5wFtpR+1smoxbl8sBbaC80tSu8pCR3gegz18D8d6lesrgy/dZ77YLrEa3FtlR2wqQ4XPvAdUP1ah6C0IjbT3IgkAtrCMHc75V6h+2tsDfPuStgtGO8nzKlvBltI1y+2pSlFLCwknqTzp6710V8nVP8A8WpH+oyP+IiqF4CsAzrnM2SpCEISrxAyVK+AFdFfJcjek6wvNz/Micn9Nzm/5KS43II8Jr3n9Ab4uWklbuYVSg/me53gMvko78qFX771YrzaQn+ogfhXJFdO/KauGWNSrb+q7LLA/RCwP2JrmKp4DGY8PhaeDR6BfPsDO8ah44yO+SUpSm6epSlKEJSlKEJSlKELe6Bn/NusbXK2wHwhWR4L7p+BrvHgXJan2K62SSPo+fn9qXE8qv7Hxr+eNdj/ACddVIVNstyWrlbuLXo0j1L6Z/pp/bWX2to3VOHuLNW5jwzSOtf7JiVPVHQ3YfHT5qGRYa7VfblZXxyLZWpgj+chXLn8a591BCctGoJkIEoUw6Qkg7hJ3HwIrrn5RFn+YuIUe+tNfve5N8/+0RhKx93KfeaoHjhZUpfh6gipBZkIDbpHgeqT923uFPKetbWxQVzTlM0X7HDIhfQSz2rCCwdaB3/q77qtQ64HUuhau0SQQrO4IqcToSLvCuJZQ4p2c0LtDUpXMVuJCvSGxgY6c6v9kB41BKlWj5kiTFVa2JKI8+MszLa6tWMOJAK2h1HeCQQPEpx9qroO6blZ9g32mManTvH1Vo8DuOUnSFjZst3gRXLSwopS53g5zYyMYHhjcnzFdD6S4uaK1HHzHubLCgkFxpbgOM+G25+6uGbktbjyH4KA1EluZMfly206ccyeU5G22P5pHjmt3L0/b2tKt3RlxSZ6HkoWhLnKSSOoAGwyCMkDpUwCTYZqxBiEsTbcFfXywbzDjfMEll5l9QafSlKFhQJy3jmx7Dt5gjwrlKQ84+8p5xRUtRyTW9chy5zSPTpzxIUSEOntFjI8D/17KzIVpabPax4jrg8FK7x92BjPsrV4ZsViVdZ7x0TDxfl5DX0S+qr2PkLjqeS0LF2usVYLc2QhQGxKt8e+veHf7hFiqjtqHIoEEBSkbHw7pAqRMWhVzmR4So3M9JdQy1z4QOZSgkbnAHtJ9tfi0acix+IluiTuxTb0XZpuUh9zkQhrtQFcyvzeXO/l51xx3ZSow2QshcJgBve7rbmRmowzCRtzlnZaa33XU02QGIUuc+44rZCCVZNXnwf+T7e75cGr3xHDkWCjdFvU5h57y58HuJ9X1j6utdTWaHbYVvaZtUaGxDV9I2mM2lKFJ/O7oArM3r4Bim2tTIDFTx9HwJPW8NLfFainwljTvPN/RVp8oaGuVoSJbY6UpMm6MtJSpaUco5Vk7k48Kqm7W2+XeHZdFSXe0+bLzKjMv93m9H+i76sHfHPnHXerY+UEmM7puxNSZXozS75H7/Z8/wDFu42yPGqltrEF3XkJr5z+j/dPMWhfYfXe5mO51/S39VMNnHFtC119C52l8+9ca1o6U+AUyssSVG+TLdIMr97ONuOI+nX3UZeT9brtvmqm1RLc0FNusSDKbcam21DDimnu+3zBlawo8o7xAVjboatSyJSx8mKaiG8JAD7nYuFnuL/fA5e4v1+BqhuJ19h6m1E2hPKIkNtKp7zLaW+YJABHQZUSAASPzBju02wON0s05dm3fN+/Kyq1ZFmNGpHwUMv77wtjapO8u5vKnPEjfkOQgffzn2EVp1SSWw2G0hA6A5OK9LvNXcbi7LWnk5yAhAOyEgYSkeoAAe6vtlt710usa3sDLj6wkeoeJ+6tffdFyqW6ZHhkY5AfvtVw8LYi7Zw8XLUrlXLcW4kY3GcISPfy5ro/5OURqx8OLpqGUNpD7iz/AKNlPL+3nqkJkVSU27T1uYSp0hDTbaRtzKwlse/auhNfhnSHC226WiujtFttxs/ngd5a/ef7dZLal5dh8NE3r1EgJHJjU32pq2UTTGDlAy3e46/Fcq/KCuSzbIMNRBclSFyHD45HX4qqmKmPGC6/OWtJDaDlqGOwTt4jdXxJHuqHVqYIxHGGhYzA6cwUTA7U5nxzSlKV1TZKUpQhKUpQhKUpQhKtbgLfi2/IsDq1Dny/HweigO8PgMe+qprJtk1+3XBidFVyvMrC0H1ioSMEjS08VRxKiFbTOhOp07CNF/Qe/wAJvihwn+jGLpE77eP5dH1h7Fg/1vVXOiojN6ssyxTkciigjCxylJB2z604P3VYvAfiBDaXGn82LbO5W5CFHPYODor2g/eDms75QGjHbReP3aWhr95y3P35yfxTp+3+gv8Ab7ayOBv/AIfVSYLObMkO9ETwdxamWyuOkASTDNo3JG8xouMrvAkWy4vQZScOtKwcdD5Eeo1jIWptaVoUUqScgg7g1dfEXTcfU1k+dLelIuMYEkDbmSMkoPmfEH2+e1JrSpCilQIUDgg+Fa2N7jdrxZw1CYYrhxopQWG8bs2u5j6jipelxy/NPXdj6WWgBVyiJASVj/xDfrzuryJydlEDDmieQy4Ja1x+ZSY8kglsnqUq68itunTG/Tc6O3TZVvmtTYTymJDSuZC09QaltpusS4EKiCJbritJTKjycGHPA3Awfya/DqB5KR0qxDK6Jwc0kEaEahUHtEwuOtxHP7r00lJfVdVMzY3ItLRWNuYK8QUjz8iM7VNkONHftahZYZW4IMJ1VrkFZC7fPd7JQzjZt1RDZT4gOcpHgVZzUanR7tYJq4spuTGVkEpWlSCfcdwa1P8AuWocxpqLvI43+33SeSlEjyAbHkrSu3/ZrjX8pyo+9VYz0BrUvFlrT8RJhpulwW004loENpKiSop5sbA5wMdKgVpnyXtWQjPnPKQHE5Lq+XlGMgHfAqweAE1Vw+UpanUnnaVJmqb2GySy75eqlFdtTU0Lpayku1zWGxOfar9JRNs1jjcFwXWXDXQsLRNo9BhXKfN5/r+kvfRc381obI91S2lfBX5lr6+oxGodUVDt57jcn/hbuOJkTd1uQCrvjZKjRmNLuyrm7bmvnxnnfR+b2a0qCjzDkGCrJ+FVXpac1O15CnfuhnOOSLlM5PoPyqezaV2Wec9wciPb6qnvH29aHTa7edRTA+1ElF70OO8EF5QBQUlYBACebJA7+21UJrfiTP1XDZgWiPE0vpuNmMJTaOQ9kTuhOO8vOxIH1iEkhPWvouz1FM6iazdIve5OXlxP7zSGpqGumIZn++J0Cz9fcSrg3oxrh7Z54nSStxy5XEAAZLmcAgkAAYyoHcjbYDNNXiXFDDdvt2SwjvPPEd59zxPnyjoB7T1Nfu53RhMQ220tqZikkuvL/KyT4FR8B/NG3icmtPWzpKSOmaQwWub95PFLpZM8jc/vIfv7qtvhBp8W63L1JPQpK3Ryxx4pR+d7VHAH31FuGmj3dQz0ypTahbmjlR/lCPsj1edXPa7bP1TfomnbOhJ7RWCSMBIHVwj81Px99dXBspLXndY3N7uAH1T7C4Rh0P8AEphnpGOZ/V3D1U7+Tppl276qkarnN/veA5yM/wA98p/5EH4itZ8oHXLIeuF0aUksQ0+jROXcOq8/YpW/qAq0NaToGg9FRtIWMBuQtnk58d9CCe+6r1rOfj5VxXxj1KLveRa4ij6HBPKTnPO50J93T76ymGvfjeJPxR4tGPdjHJo4+KwGMSuxGqbQg3AO9Ie3koI4tTjinFqKlqJKifE1+aUrZJylKUoQlKUoQlKUoQpBatH326QEzYUZLrKjgEKzv5VmN8PNWODKLYtXsz/dWBpDU9x03N7aI4VMr2dZUe6sez/r4muh+HWoYWomPSYShzgd9onvII6Z8/VgDFLK6qmpm74AIWuwXCcMxKPdMhbIOGWfdkqMRww165+S0vc3P0Y6j+FYkvQOs4chtiZpq5x3HE86A7HUnKfPpXcOmaj3Gkfw/Zv9Re+DiP76zdDtVLUVraYsAB4pJtVQtwajfUREuLeBXPfDGy6g0248qVDmLZkN83ZISnCVA9e8ob7DIxgirms2vtTQrb80SbY3dbW4jsVxZq0fU8sg5x99Qh3Vdva1OLEWJRIUlkyAnLKXSNkEnpsfLx361jSdc2Zm2+nKjzCkxfSlBKEkoHadlg7jB5z6+h8qf1dDHWWMzL2zHZ2r5zT7TYpCCYaZgLwM925N9MyVmm3z41ycctcVqNCcc7jL8vnUhP5qiEb486jOrOHov8701Ho0J457QtOqUHPaCkb++t9cdZW2K/NZbjT5DkMshYbQFFSnfyYT3hnOfV18a/B1pbxbWZDUG4KlPyFs+hJYy/lA7+2dsDrv4+3F2R80jg86gW8O3muZ2l2hdTCACzCbgWGtr3F9MvBQxHCAj693T+qg/iKyU8IYQHfub6j6sD/lNTuy6ht92cZRCW4S7FErZJGBkjGfMcp28K8dTapt9heQzJjT5K1ILqkxmQrsmwd1Lydk5zg79PVXnSyXtxSluNYy6Xogfe5WCjP+DdSojcN68OPstjCWpKOcN7/ZOApI9QI99Y8Xhk/HSlKb6sstuBQQ4gKbCvA8qgQD696ljeqYj18Fpi264SAC3mS0xmOgLSFjKs53CvLxr5eNW2u13k2+Q1MdLZbD77bGWYwUcJK1HpnwwK9EswOSl/FsaeQw5m19BootJ4XQ3kp7RSS7zHtHG3lBSz7wpPwrZaB0fL0RqyNqG0vR5UmPzBLcleUEEEHOEeR67VtTq22fP/zSGJn5b0b0rsR2HbYzyc+frY2xivKPri0yFPgMz0obaedafWwOyfS0CXOzOdyB5461GUyTMLHi4I05gr2LEsbb7wvwKsy68TNaPxFtQoNmhvnHK8Fqc5R+gtO599VxrG68WL6lbB1G0ll1AbdYZYCUKAORkKUoAjzGKyNNaji39chDMabCdjAFTMtsNqPMFYOM9Nj91YkHWdlk3BUUNymWwHlIlOM4Ze7P63IrOTgDf1ZqjBh9NA68cLQR2BWDtBjji5jwTu6g5/Pkq3uOhtXKmLkuxFXF3r28uQHFH9TJOfUc1pbrpPWT7oclW6Y+vGAAgnA9QxsKt+Fre1SGysxpsZKC0oduxyczS3AgOp3PdBV7q9LxrGDbZoiogz5shTymwiIwlSspShZ6q3GHB4dc0yD5NLKzHj2Kh+46Eemnj2qh5Om77GGZFrktfpJxW60Poxy8y+0uLzcSI2spUlTgDjhH2QOo9vr+623da29u4mI5AuzaUFlMh/0b6Jgu4wHDzZT16eB2rKhX6yXR1plLYKnJbsZKVMg4U2CVZ8sge/PhQ98hba1u1MaPaiaB4lqaQuaM9bA8eR4ZrFUpsMItdnjp7BsBKuVOEjHQA+VWHw01NG0M0PRbO3Icf/x19a/pF/mpR4BA8vHrt4VmdQaT+a5d1TG+hjSvRHFNNhCkqJABBBHd9ftNfbpebVBKgy1d1yG5PYdhHUpxaiGgvZKlY5cHJ6YqriNOKyl9jDbMOvMntK2VJt1Q1M5kxGleXZgWtutGWQGVrAhWBxKs+rNV2qbdNGTWb1cpbmHAhwR3oySCccilbYACRhRyfZXNKuGXEQK5TofURPmLc6R9+KtGJrZ+DMiOWF++yJLjDUgLjxErSyFnGDgpPgRjpV5aM1xfLld4Vnu8eC726HB6UxzIVskn6m48POkb5cRwmC0bGuY3wIHhl8AqtMcB9oEdK9zXSm9nD3ie/PwuVxfJ0TrCN/jGmLu1+nEWPwrz/cjqX/Isv+hXZ2vP4yqp1hqe3aagGRKXzSFAhDKT3l9RgfiTsPWcVaoMamq2ghguV9Cj2Qom05nnmLWjM6KhLjpe/W6EqZNtzjDCccy1qTtnptnO9aatxqnUVy1FOMmc6eQEltlJPI3nyz49NzvWnrRs3t33tVhaoQCUinvu8L6nySlKVJV0pSlCEqTcNF3sathosbq0PrcAVhWAU+Oc7dM/+2ajbTa3XEttpK1qICUgbk10PwT0qLDDEqUjE2SAXCdw2MHAx+3y++qOIVDYICSLp3gOGS19UNwkBuZPJX1pXtexb7T8p2ff5Pq81aTjb/2xp3/UZXwcY/vre6YrTcb0/wAJaZd/zExH9aPXyrCT/wB7j7d7/wCSrX+oTb4VMOxUDfXOz4ixlQY9wiXFchhK+UEsS43KOdw7dU9P1B417S7GG7fqXMV1Rl3hgcnXma7Rlzb1Zcczjzqd0r6sJSLWX58GNOaGBjeqGjXXdIPy8O7JVSxAuabJKuE5ifEIEFEkRwQ6C0+poY2zzBLaT7cGs+zyE2lUS6uw7jItrEiUgSn2lF8dr2RDjgAye+hxGdvDpVhSpcSJvKlMs/puJTWom6v05EOH7tHQT4AlY/uqXSudlZMji09ULCAkHlfS1uXLj8FGNP3A2W7xn7xEms+lxHCkIYUrkUuU45ynlHUBQ22rY6ruRtGoJTrkKVME+2pYi9m2pSe1Spz6PAHQhwY99fJnE3TDS+UPyHVebaBy/fUhhXJc5svw4sdxrHcX6WhQV7OXmFBJvchQnM7JBPNAW3yNza+dxblbxUe0NYJMK7OyZEmcyY6I7JZScMOlMVAJyQcnOwIOxArE1ROutouV3j29UkTZz7L8R1Eftw8OQNqaOQUgZGd/D21aFisUu7bfPenITmfqSn3UK/4ePjUsZ4RamdaDjd8sx/QQtfxpPVY/RUklqh9vA/RXqOkxCql6cRteLAW3m8Ld/EcVQa3pCp6tPiBK9NN79O5uU8nYdt23ac+MdO7161py5ImWKLZ27W+iVZYcpMvKdgewW2AD9oqJzgeVdCTuFOvmv8Vd05I/27qFfFFYKuGnEzws9pc/34VOPaLDpBcTt8XAeqYNwvFGaU/b1uNiD8Doqy0c4LnejcmY0phiPbmYmHmyjmWFKUQAR0AI39ZrQxvnlyJG0owZTS2oUmNMjGNysqPYrDb3a+SyUEYOPjV5ReGPEdz8rbLK1+ncVfg2aynOFuum+sayu/oTlfi2K5naPDWOIMzfMFVxhmKxOc/2e4NrZg2sCL/E8u9UWhR1U1Jaj2+Sx6PZFsKKmikpkKU2tKB7OzHuNa2a0sx7DdrkbvDMt2XJkrgpV2rZcI5RsCR3cCrlv1hvljP8J2tpoeSJzC1fdz5+FaM3Bto/SRpLX+xV+GaZQVjJ270Zu1LX1lRSv6MxWHK+YuCDnnzv4KvpVukvXp69JE963ekwFvR1pz6Qz2beFkYypSSUkj1b1+UxZtpv8W5wo6nWXl3KSUqST9I36Rg4H56CkDHXlFT2NqGxv4DV0hnJx9IsJz7eYiti0407+Tdbc/QruJSBYhcH4xPG3dfEbWtncZbtuXjfwVTs2K4Qo7tku8RPo870IEww4UYbdS24SSPymCCfCvljVLsjke6XhiU8LfOkxnyhBUQCy0hC/WDydfXVtUrzpyciFzdtC54IfGPe1z7LG3K4+KqqXMZc1SxOuhvNp7eHGKY8EqIOFL7rhA9m3Xc1ePD7/v7ava9/w1Vo63fD/wD792r/AGv/AAzSzF371HJ/afRMMCr21eMUtm7u6QNb/vzK3XEj0j0V/wBC7L0jk7nN+dj9nniuLNSO3R29STeS56aF4dC/A+XsrtnXn8ZXP3GXSguEM32A0TKjjD4A3cR5n1jrnyz6qV7MTtjjDXDXiv0pj+FzVeHNliJPR5kcCOduY9FS1KUrZr5ilKUoQlKUoQrG4V6bYSk6lvJQxFZP0BeIShasdTnqNx5Z2G+4qZXLixZbMlSLc2u5PnyPI2PfgHy2+NUc9MlPMtsuvuLbbGEJKtgK8KpTUTJ3XkNxyWkptopKGl9npGBt9XHMkq2zx+1u0r94iBFT4BMdKsf0s19jcbNRXee09rCYJzERpaIzbUdtsgrxndKRn6o659lVHSox4XRxv32xgHnbNZ+vmlr43R1DiQdVZl14uXF0qFutzEbm6qWSs/3VFrjrfVE78rdn0j81s8oPuFRylXBG0aBKqfCKKn/DjHr6r0W++sYW84oeRUcV50pU0wAA0Ssu2XO4Wx7trfMfjL8S2sjPt86xKULxzQ4WcLhT+18VdQRiBNZizh5lHIr+rt8KmFi40w46+0W1dbc55xXQR94IPwqkKVXlpYpRZzUplwGhkdvBm6ebSR6ZLqK28fUhkITrCc2D4SWlLUPeUn9tbRPH51O41kz/AOVa/wDRXJNKXP2fw55u6Fp8B9FAYMW5MqJAP7vsurpPH/8AlNaEf6KKB/YbqL3bjlCk8yZF4v8ANQr6wBOD7lKA+Fc80rpFglBCbsiaPALw4Ex/4k0ju932VpXPi/JUr+DbQyj+dIWV/AY/bUJv2rNQXsck+5Ora/k0d1P3Dr760dKZMjYzqhXKbCqOmO9HGAeep8yvoJHQ4r2RMloUCmQ7lPTvE4rwpU1fLQdVJLdrnVMFWWrs+sDol086f6J2qQ2rize2O7Ojx5Y8VFISR6gBgYquqVAxtOoVCbCqKbrxDyt6K6LbxatLm02FIjD/ADZ5ifiAPfmtlduJ7NoZY1BpeXFkT46yC082T3VDlVn2gkbEGqFpXJ9LHIC1wuDqFTp9n6SmqGVEN2ubpmrguHH3UdxcUZtntYQeiWO0QQfeo1IbBxD01du45L9CkLz3JA5QP1ulc/UqscKpg2zBu9y+g4ftXiFFlvb7eR+uqm3FPSvzJcRcISM2+USRgghted07eHiP/aoTWZHudwYhuwmpjyYzwIcZ5soVuD06dQPuFYdXo2lrQHG6T4hPBPOZYWbgOduAPG3Z6aJSlKmqSUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShCUpShC//Z";
+document.getElementById('login-logo').src = LOGO;
+document.getElementById('sb-logo').src = LOGO;
+
+// ── AUTH ──
+const CREDS={admin:'lcda2026',finance:'lcda2026',region1:'lcda2026'};
+const ROLES={admin:'Super Admin',finance:'Finance Officer',region1:'Region Admin'};
+
+function doLogin(){
+  const u=document.getElementById('lu').value.trim().toLowerCase();
+  const p=document.getElementById('lp').value;
+  const err=document.getElementById('lerr');
+  if(CREDS[u]&&CREDS[u]===p){
+    err.style.display='none';
+    document.getElementById('sb-u').textContent=u.charAt(0).toUpperCase()+u.slice(1);
+    document.getElementById('sb-r').textContent=ROLES[u]||'Admin';
+    document.getElementById('u-name').textContent=u.charAt(0).toUpperCase()+u.slice(1);
+    document.getElementById('login-screen').style.display='none';
+    document.getElementById('app').style.display='block';
+    initCharts();
+    animN('d-total',66200000,v=>'₦'+v.toLocaleString('en-NG'),1800);
+    setTimeout(()=>{const p=document.getElementById('d-prog');if(p)p.style.width='78%'},500);
+  } else {
+    err.style.display='block';
+    ['lu','lp'].forEach(i=>{const el=document.getElementById(i);el.classList.add('err');setTimeout(()=>el.classList.remove('err'),700)});
+  }
+}
+function logout(){
+  document.getElementById('app').style.display='none';
+  document.getElementById('login-screen').style.display='flex';
+  document.getElementById('lp').value='';
+}
+document.addEventListener('keydown',e=>{if(e.key==='Enter'&&document.getElementById('login-screen').style.display!=='none')doLogin()});
+
+// ── TAB ──
+const TITLES={overview:'Revenue Overview',transactions:'Transactions',compliance:'Compliance by Region',payers:'Payer Registry',regions:'Region Management',users:'Admin Users',remittance:'Remittance Reports'};
+const SUBS={overview:'Onigbongbo LCDA · May 2026 · Live',transactions:'All payments · May 2026',compliance:'Live tracking across 7 regions',payers:'Upload and manage registered payers',regions:'Assign admins to regions',users:'Manage access & permissions',remittance:'Auto-generated monthly reports'};
+function tab(id,el){
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('tab-'+id).classList.add('on');
+  document.querySelectorAll('.nav,.mb').forEach(n=>n.classList.remove('on'));
+  if(el)el.classList.add('on');
+  document.getElementById('tb').innerHTML=`<h1>${TITLES[id]}</h1><p>${SUBS[id]}</p>`;
+}
+
+// ── CHARTS ──
+function initCharts(){
+  const months=['Jan','Feb','Mar','Apr','May','Jun'];
+  const vals=[58,62,71,67,78,0];
+  const chart=document.getElementById('m-chart');
+  const lbls=document.getElementById('m-lbls');
+  if(!chart||chart.dataset.done)return;
+  chart.dataset.done='1';
+  vals.forEach((v,i)=>{
+    const g=document.createElement('div');g.className='bg-bar';
+    const b=document.createElement('div');b.className='bar'+(i===4?' hi':'');b.style.height='0';
+    g.append(b);chart.append(g);
+    lbls.innerHTML+=`<div style="flex:1;text-align:center;font-size:9px;color:var(--muted)">${months[i]}</div>`;
+    setTimeout(()=>b.style.height=(v/80*120)+'px',80+i*60);
+  });
+  const cats=document.getElementById('cat-bars');
+  if(cats&&!cats.dataset.done){
+    cats.dataset.done='1';
+    const items=[{n:'Business Levy',p:49,a:'₦32.4M',c:'var(--gm)'},{n:'Tenement Rate',p:28,a:'₦18.7M',c:'#1A3A6A'},{n:'Signage Levy',p:15,a:'₦9.8M',c:'var(--gold)'},{n:'Other',p:8,a:'₦5.3M',c:'var(--muted)'}];
+    cats.innerHTML=items.map(x=>`<div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;font-size:11px;margin-bottom:3px"><span>${x.n}</span><span style="font-weight:600;font-family:'DM Mono',monospace">${x.a}</span></div><div class="pb" style="height:6px"><div class="pf" style="width:0%;background:${x.c}" data-w="${x.p}"></div></div></div>`).join('');
+    setTimeout(()=>cats.querySelectorAll('.pf').forEach(e=>e.style.width=e.dataset.w+'%'),200);
+  }
+}
+function animN(id,target,fmt,dur){
+  const el=document.getElementById(id);if(!el)return;
+  const s=Date.now();
+  const t=()=>{const p=Math.min((Date.now()-s)/dur,1),e=1-Math.pow(1-p,3);el.textContent=fmt(Math.round(target*e));if(p<1)requestAnimationFrame(t)};
+  requestAnimationFrame(t);
+}
+
+// ── CSV TEMPLATE DOWNLOAD ──
+function downloadTemplate(){
+  const headers = ['Account ID','Business Name','Category','Region','Address','Phone Number','Last Payment Date','Payment Channel','Balance Due (N)','Status'];
+  const sample = [
+    ['ONG-OPB-2024-0001','Sample Business Ltd','Retail — Grade A','Opebi','1 Opebi Road, Opebi','+234 801 0000 0001','May 2026','Card','0','Compliant'],
+    ['ONG-MRY-2024-0002','Sample Household','Residential','Maryland','5 Maryland Avenue, Maryland','+234 802 0000 0002','Apr 2026','Transfer','18000','Overdue'],
+  ];
+  const csv = [headers, ...sample].map(r=>r.map(v=>`"${v}"`).join(',')).join('\n');
+  const blob = new Blob([csv], {type:'text/csv'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'onigbongbo_payer_template.csv';
+  a.click();
+}
+
+// ── FILE IMPORT ──
+function handleDrop(e){
+  e.preventDefault();
+  document.getElementById('drop-zone').classList.remove('drag');
+  const file = e.dataTransfer.files[0];
+  if(file) handleFile(file);
+}
+
+function handleFile(file){
+  if(!file) return;
+  const status = document.getElementById('import-status');
+  status.style.display='block';
+  status.innerHTML=`<div class="al al-gold"><span>⏳</span><span>Reading <strong>${file.name}</strong>…</span></div>`;
+
+  const ext = file.name.split('.').pop().toLowerCase();
+  if(ext==='csv'){
+    const reader = new FileReader();
+    reader.onload = e => parseCSV(e.target.result);
+    reader.readAsText(file);
+  } else if(ext==='xlsx'||ext==='xls'){
+    // Use SheetJS via CDN
+    if(!window.XLSX){
+      const script = document.createElement('script');
+      script.src = 'https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js';
+      script.onload = ()=>readExcel(file);
+      document.head.appendChild(script);
+    } else {
+      readExcel(file);
+    }
+  } else {
+    status.innerHTML=`<div class="al" style="background:var(--redl);color:var(--red);border:1px solid #fca5a5"><span>⚠</span><span>Unsupported file type. Please upload CSV or Excel (.xlsx)</span></div>`;
+  }
+}
+
+function readExcel(file){
+  const reader = new FileReader();
+  reader.onload = e => {
+    const wb = XLSX.read(e.target.result, {type:'array'});
+    const ws = wb.Sheets[wb.SheetNames[0]];
+    const data = XLSX.utils.sheet_to_json(ws, {header:1});
+    processRows(data);
+  };
+  reader.readAsArrayBuffer(file);
+}
+
+function parseCSV(text){
+  const lines = text.trim().split('\n');
+  const rows = lines.map(l=>{
+    const result=[];let cur='';let inQ=false;
+    for(let i=0;i<l.length;i++){
+      if(l[i]==='"'){inQ=!inQ;}
+      else if(l[i]===','&&!inQ){result.push(cur.trim());cur='';}
+      else{cur+=l[i];}
+    }
+    result.push(cur.trim());
+    return result;
+  });
+  processRows(rows);
+}
+
+function processRows(rows){
+  if(rows.length<2){
+    document.getElementById('import-status').innerHTML=`<div class="al" style="background:var(--redl);color:var(--red);border:1px solid #fca5a5"><span>⚠</span><span>File appears empty or invalid.</span></div>`;
+    return;
+  }
+  // Skip header row, map columns
+  const header = rows[0].map(h=>String(h).toLowerCase().trim());
+  const colMap = {
+    id: header.findIndex(h=>h.includes('account')||h.includes('id')),
+    name: header.findIndex(h=>h.includes('business name')||h.includes('name')),
+    category: header.findIndex(h=>h.includes('category')),
+    region: header.findIndex(h=>h.includes('region')),
+    address: header.findIndex(h=>h.includes('address')),
+    phone: header.findIndex(h=>h.includes('phone')),
+    last_payment: header.findIndex(h=>h.includes('last payment')||h.includes('date')),
+    last_channel: header.findIndex(h=>h.includes('channel')),
+    balance: header.findIndex(h=>h.includes('balance')||h.includes('due')),
+    status: header.findIndex(h=>h.includes('status')),
+  };
+
+  const data = [];
+  for(let i=1;i<rows.length;i++){
+    const r = rows[i];
+    if(!r||r.length<2||!r[colMap.id>-1?colMap.id:0]) continue;
+    data.push({
+      id: r[colMap.id]||'',
+      name: r[colMap.name]||'',
+      category: r[colMap.category]||'',
+      region: r[colMap.region]||'',
+      address: r[colMap.address]||'',
+      phone: r[colMap.phone]||'',
+      last_payment: r[colMap.last_payment]||'—',
+      last_channel: r[colMap.last_channel]||'—',
+      balance: parseInt(String(r[colMap.balance]).replace(/[^0-9]/g,'')||'0'),
+      status: r[colMap.status]||'Pending',
+    });
+  }
+
+  if(data.length===0){
+    document.getElementById('import-status').innerHTML=`<div class="al" style="background:var(--redl);color:var(--red);border:1px solid #fca5a5"><span>⚠</span><span>No valid records found. Check column headers match the template.</span></div>`;
+    return;
+  }
+
+  BUSINESSES = data;
+  loadedData(data);
+}
+
+// ── LOAD DATA INTO UI ──
+let BUSINESSES = [];
+let filtered = [];
+let currentPage = 1;
+const PER_PAGE = 50;
+
+function loadedData(data){
+  const comp=data.filter(b=>b.status==='Compliant').length;
+  const over=data.filter(b=>b.status==='Overdue').length;
+  const pend=data.filter(b=>b.status==='Pending').length;
+  const rate=data.length?Math.round(comp/data.length*100):0;
+
+  // Update stats
+  document.getElementById('ov-total').textContent=data.length.toLocaleString();
+  document.getElementById('ov-new').textContent=`${comp.toLocaleString()} compliant`;
+  document.getElementById('d-comp').textContent=rate+'%';
+  document.getElementById('d-cprog').style.width=rate+'%';
+  document.getElementById('d-over').textContent=over.toLocaleString();
+  document.getElementById('c-rate').textContent=rate+'%';
+  document.getElementById('c-comp').textContent=comp.toLocaleString();
+  document.getElementById('c-over').textContent=over.toLocaleString();
+  document.getElementById('c-pend').textContent=pend.toLocaleString();
+  document.getElementById('sb-count').textContent=data.length.toLocaleString();
+
+  // Show success
+  document.getElementById('import-status').innerHTML=`<div class="al al-g"><span>✅</span><span><strong>${data.length.toLocaleString()} records imported successfully.</strong> ${comp.toLocaleString()} compliant · ${over.toLocaleString()} overdue · ${pend.toLocaleString()} pending</span></div>`;
+
+  // Show table, hide import card
+  setTimeout(()=>{
+    document.getElementById('import-card').style.display='none';
+    document.getElementById('payer-table-card').style.display='block';
+    filtered = BUSINESSES.slice();
+    currentPage = 1;
+    renderPayers();
+    buildComplianceTable();
+    buildRegionTable();
+    buildRecentTxns();
+  }, 1200);
+}
+
+function showImport(){
+  document.getElementById('import-card').style.display='block';
+  document.getElementById('payer-table-card').style.display='none';
+  document.getElementById('import-status').style.display='none';
+  document.getElementById('file-input').value='';
+}
+
+// ── PAYER TABLE ──
+function filterPayers(){
+  const q=document.getElementById('p-search').value.toLowerCase();
+  const reg=document.getElementById('p-region').value;
+  const stat=document.getElementById('p-status').value;
+  filtered=BUSINESSES.filter(b=>{
+    if(q&&!b.name.toLowerCase().includes(q)&&!b.id.toLowerCase().includes(q)&&!b.address.toLowerCase().includes(q))return false;
+    if(reg&&b.region!==reg)return false;
+    if(stat&&b.status!==stat)return false;
+    return true;
+  });
+  currentPage=1;renderPayers();
+}
+function resetFilters(){
+  document.getElementById('p-search').value='';
+  document.getElementById('p-region').value='';
+  document.getElementById('p-status').value='';
+  filtered=BUSINESSES.slice();currentPage=1;renderPayers();
+}
+function renderPayers(){
+  const start=(currentPage-1)*PER_PAGE;
+  const page=filtered.slice(start,start+PER_PAGE);
+  const tbody=document.getElementById('payer-tbody');
+  document.getElementById('payer-count-lbl').textContent=`— ${filtered.length.toLocaleString()} records`;
+  tbody.innerHTML=page.map((b,i)=>{
+    const sc=b.status==='Compliant'?'bg':b.status==='Overdue'?'br':'bo';
+    const bal=b.balance>0?`<span style="color:var(--red);font-family:'DM Mono',monospace">₦${Number(b.balance).toLocaleString()}</span>`:`<span style="color:var(--gm);font-family:'DM Mono',monospace">₦0</span>`;
+    return `<tr>
+      <td style="font-family:'DM Mono',monospace;font-size:10px">${b.id}</td>
+      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${b.name}</td>
+      <td style="max-width:120px;overflow:hidden;text-overflow:ellipsis;font-size:11px">${b.category}</td>
+      <td><span class="rt">${b.region}</span></td>
+      <td style="max-width:140px;overflow:hidden;text-overflow:ellipsis;font-size:11px;color:var(--muted)">${b.address}</td>
+      <td style="font-family:'DM Mono',monospace;font-size:11px">${b.phone}</td>
+      <td style="font-size:11px">${b.last_payment}</td>
+      <td>${bal}</td>
+      <td><span class="b ${sc}">${b.status}</span></td>
+      <td><button class="btn-s btn-out" style="padding:4px 9px;font-size:10px" onclick="openModal(${start+i})">View</button></td>
+    </tr>`;
+  }).join('');
+
+  const total=filtered.length;
+  const pages=Math.ceil(total/PER_PAGE);
+  document.getElementById('pager-info').textContent=`Showing ${(start+1).toLocaleString()}–${Math.min(start+PER_PAGE,total).toLocaleString()} of ${total.toLocaleString()}`;
+  const btns=document.getElementById('pager-btns');
+  let html=`<button class="pbtn" onclick="gotoPage(${currentPage-1})" ${currentPage===1?'disabled':''}>← Prev</button>`;
+  const range=[];
+  for(let i=Math.max(1,currentPage-2);i<=Math.min(pages,currentPage+2);i++)range.push(i);
+  if(range[0]>1)html+=`<button class="pbtn" onclick="gotoPage(1)">1</button>${range[0]>2?'<span style="padding:0 4px">…</span>':''}`;
+  range.forEach(p=>html+=`<button class="pbtn ${p===currentPage?'on':''}" onclick="gotoPage(${p})">${p}</button>`);
+  if(range[range.length-1]<pages)html+=`${range[range.length-1]<pages-1?'<span style="padding:0 4px">…</span>':''}<button class="pbtn" onclick="gotoPage(${pages})">${pages}</button>`;
+  html+=`<button class="pbtn" onclick="gotoPage(${currentPage+1})" ${currentPage===pages||pages===0?'disabled':''}>Next →</button>`;
+  btns.innerHTML=html;
+}
+function gotoPage(p){
+  const pages=Math.ceil(filtered.length/PER_PAGE);
+  if(p<1||p>pages)return;
+  currentPage=p;renderPayers();
+  document.querySelector('.tbl-wrap').scrollTop=0;
+}
+
+// ── MODAL ──
+function openModal(idx){
+  const b=filtered[idx];
+  document.getElementById('m-title').textContent=b.name;
+  document.getElementById('m-body').innerHTML=`
+    <div class="dr"><span class="dk">Account ID</span><span class="dv" style="font-family:'DM Mono',monospace;font-size:12px">${b.id}</span></div>
+    <div class="dr"><span class="dk">Category</span><span class="dv">${b.category}</span></div>
+    <div class="dr"><span class="dk">Region</span><span class="dv">${b.region}</span></div>
+    <div class="dr"><span class="dk">Address</span><span class="dv">${b.address}</span></div>
+    <div class="dr"><span class="dk">Phone</span><span class="dv" style="font-family:'DM Mono',monospace">${b.phone}</span></div>
+    <div class="dr"><span class="dk">Status</span><span class="dv"><span class="b ${b.status==='Compliant'?'bg':b.status==='Overdue'?'br':'bo'}">${b.status}</span></span></div>
+    <div class="dr"><span class="dk">Balance Due</span><span class="dv" style="font-family:'DM Mono',monospace;${b.balance>0?'color:var(--red)':'color:var(--gm)'}">₦${Number(b.balance).toLocaleString()}</span></div>
+    <div class="dr"><span class="dk">Last Payment</span><span class="dv">${b.last_payment}</span></div>
+    <div class="dr"><span class="dk">Channel</span><span class="dv">${b.last_channel}</span></div>
+    <div style="margin-top:14px;display:flex;gap:8px">
+      <button class="btn-s" style="flex:1" onclick="alert('Sends WhatsApp reminder to ${b.phone}')">📲 Send Reminder</button>
+      <button class="btn-s btn-out" style="flex:1" onclick="alert('Invoice history for ${b.name}')">📄 History</button>
+    </div>`;
+  document.getElementById('modal').classList.add('on');
+}
+function closeModal(){document.getElementById('modal').classList.remove('on')}
+document.getElementById('modal').addEventListener('click',e=>{if(e.target===document.getElementById('modal'))closeModal()});
+
+// ── COMPLIANCE TABLE ──
+function buildComplianceTable(){
+  const regions=['Opebi','Oregun','Maryland','Ikeja GRA','Shomolu','Omole','Anthony'];
+  const admins={Opebi:'Ade Balogun',Oregun:'Ade Balogun',Maryland:'Kemi Adeyemi','Ikeja GRA':'Tunde Rasheed',Shomolu:'Ngozi Okonkwo',Omole:'Seun Alabi',Anthony:'Bisi Ogunleye'};
+  const tbody=document.getElementById('comp-table');
+  let rows='<tr><th>Region</th><th>Admin</th><th>Total</th><th>Compliant</th><th>Rate</th><th>Outstanding (₦)</th></tr>';
+  regions.forEach(r=>{
+    const bs=BUSINESSES.filter(b=>b.region===r);
+    if(!bs.length){rows+=`<tr><td><span class="rt">${r}</span></td><td>${admins[r]||'—'}</td><td>0</td><td>0</td><td>—</td><td>—</td></tr>`;return;}
+    const comp=bs.filter(b=>b.status==='Compliant').length;
+    const outstanding=bs.reduce((a,b)=>a+Number(b.balance),0);
+    const rate=Math.round(comp/bs.length*100);
+    rows+=`<tr><td><span class="rt">${r}</span></td><td>${admins[r]||'—'}</td><td>${bs.length.toLocaleString()}</td><td>${comp.toLocaleString()}</td>
+      <td>${rate}% <div class="pb" style="width:70px;display:inline-block;vertical-align:middle"><div class="pf" style="width:${rate}%"></div></div></td>
+      <td style="font-family:'DM Mono',monospace;color:var(--red)">₦${outstanding.toLocaleString()}</td></tr>`;
+  });
+  tbody.innerHTML=rows;
+}
+
+// ── REGION TABLE ──
+function buildRegionTable(){
+  const regions=['Opebi','Oregun','Maryland','Ikeja GRA','Shomolu','Omole','Anthony'];
+  const admins={Opebi:'Ade Balogun',Oregun:'Ade Balogun',Maryland:'Kemi Adeyemi','Ikeja GRA':'Tunde Rasheed',Shomolu:'Ngozi Okonkwo',Omole:'Seun Alabi',Anthony:'Bisi Ogunleye'};
+  const colls={Opebi:'₦18.4M',Oregun:'₦14.8M',Maryland:'₦14.2M','Ikeja GRA':'₦12.7M',Shomolu:'₦11.1M',Omole:'₦9.8M',Anthony:'₦13.2M'};
+  const tbody=document.getElementById('reg-table');
+  let rows='<tr><th>Region</th><th>Assigned Admin</th><th>Payers</th><th>Compliant</th><th>Rate</th><th>Collections</th><th>Actions</th></tr>';
+  regions.forEach(r=>{
+    const bs=BUSINESSES.filter(b=>b.region===r);
+    const comp=bs.length?bs.filter(b=>b.status==='Compliant').length:0;
+    const rate=bs.length?Math.round(comp/bs.length*100):0;
+    rows+=`<tr><td><strong>${r}</strong></td><td>${admins[r]||'—'}</td><td>${bs.length.toLocaleString()}</td><td>${comp.toLocaleString()}</td><td>${rate}%</td>
+      <td style="font-family:'DM Mono',monospace">${colls[r]||'—'}</td>
+      <td><button class="btn-s btn-out" style="padding:5px 10px;font-size:11px" onclick="alert('Edit ${r} region')">Edit</button></td></tr>`;
+  });
+  tbody.innerHTML=rows;
+}
+
+// ── RECENT TXNS ──
+function buildRecentTxns(){
+  const sample=BUSINESSES.filter(b=>b.status==='Compliant').slice(0,6);
+  const amounts=[45000,28500,62000,8500,55000,18000];
+  const wrap=document.getElementById('recent-txns');
+  if(!sample.length){wrap.innerHTML='<div style="padding:20px;text-align:center;font-size:12px;color:var(--muted)">No data</div>';return;}
+  wrap.innerHTML=sample.map((b,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 14px;border-bottom:1px solid var(--border)">
+      <div style="flex:1;min-width:0"><div style="font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${b.name}</div><div style="font-size:10px;color:var(--muted)">${b.region}</div></div>
+      <div style="font-family:'DM Mono',monospace;font-size:12px;font-weight:600;color:var(--gm)">+₦${amounts[i].toLocaleString()}</div>
+    </div>`).join('');
+}
+</script>
+</body>
+</html>
